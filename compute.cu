@@ -18,8 +18,8 @@ void compute(){
 	//make an acceleration matrix which is NUMENTITIES squared in size;
 	vector3* values=(vector3*)malloc(sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	vector3* d_values;
-	cudaMalloc(&d_values, sizeof(values));
-	cudaMemcpy(d_values, values, sizeof(values), cudaMemcpyHostToDevice);
+	cudaMalloc(&d_values, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
+	cudaMemcpy(d_values, values, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
 
 /*
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
@@ -57,19 +57,19 @@ void compute(){
 	// k = threadindex.z
 
 	double* d_mass;
-	cudaMalloc(&d_hPos, sizeof(hPos));
-	cudaMalloc(&d_hVel, sizeof(hVel));
-	cudaMalloc(&d_mass, sizeof(mass));
-	cudaMemcpy(d_hPos, hPos, sizeof(hPos), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_hVel, hVel, sizeof(hVel), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_mass, mass, sizeof(mass), cudaMemcpyHostToDevice);
+	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
+	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
+	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
+	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 	pairwise<<<dimGrid,dimBlock>>>(d_accels, d_hPos, d_mass);
 
 	sumrows<<<dimGrid,dimBlock>>>(d_accels, d_hVel, d_hPos);
 
-	cudaMemcpy(hVel, d_hVel, sizeof(d_hVel), cudaMemcpyDeviceToHost);
-	cudaMemcpy(hPos, d_hPos, sizeof(d_hPos), cudaMemcpyDeviceToHost);
+	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
+	cudaMemcpy(hPos, d_hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
 
 	cudaFree(d_hPos);
 	cudaFree(d_hVel);
