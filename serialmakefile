@@ -1,0 +1,12 @@
+FLAGS= -DDEBUG
+LIBS= -lm
+ALWAYS_REBUILD=makefile
+
+serialnbody: serialnbody.o serialcompute.o
+	gcc $(FLAGS) $^ -o $@ $(LIBS)
+serialnbody.o: serialnbody.c planets.h config.h vector.h $(ALWAYS_REBUILD)
+	gcc $(FLAGS) -c $< 
+serialcompute.o: serialcompute.c config.h vector.h $(ALWAYS_REBUILD)
+	gcc $(FLAGS) -c $< 
+serialclean:
+	rm -f *.o nbody 
