@@ -110,10 +110,12 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	int k = threadIdx.z;
 	if (i < NUMENTITIES && j < NUMENTITIES){
-		vector3 accel_sum={0,0,0};
-		accel_sum[k]+=d_accels[i][j][k];
-
 		if (j == 0){
+			vector3 accel_sum = {0, 0, 0};
+
+        	for (int jj = 0; jj < NUMENTITIES; ++jj) {
+            	accel_sum[k] += d_accels[i][jj][k];
+        	}
 			d_hVel[i][k]+=accel_sum[k]*INTERVAL;
 			d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
 		}
