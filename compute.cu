@@ -11,6 +11,7 @@
 void compute(){
 	//make an acceleration matrix which is NUMENTITIES squared in size;
 	vector3* values=(vector3*)malloc(sizeof(vector3)*NUMENTITIES*NUMENTITIES);
+	vector3* d_values;
 	cudaMalloc(&d_values, sizeof(values));
 	cudaMemcpy(d_values, values, sizeof(values), cudaMemcpyHostToDevice);
 
