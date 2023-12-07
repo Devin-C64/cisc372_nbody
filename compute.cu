@@ -22,7 +22,7 @@ void compute(){
 	//cudaMemcpy(d_values, values, sizeof(values), cudaMemcpyHostToDevice);
 
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
-	for (i=0;i<NUMENTITIES;i++)
+	for (int i=0;i<NUMENTITIES;i++)
 		accels[i]=&values[i*NUMENTITIES];
 	
 	vector3** d_accels;
@@ -73,7 +73,7 @@ void compute(){
 	cudaFree(d_hPos);
 	cudaFree(d_hVel);
 	cudaFree(d_mass);
-	cudaFree(d_values);
+	//cudaFree(d_values);
 	cudaFree(d_accels);
 	free(values);
 }
