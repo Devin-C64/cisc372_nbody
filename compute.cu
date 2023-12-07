@@ -4,6 +4,12 @@
 #include "config.h"
 #include <cuda.h>
 
+__global__ void accelcreate(vector3** d_accels, vector3* d_values);
+__global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass);
+__global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos);
+
+
+
 //compute: Updates the positions and locations of the objects in the system based on gravity.
 //Parameters: None
 //Returns: None
@@ -70,7 +76,7 @@ void compute(){
 	free(values);
 }
 
-__global__ void accelcreate(vector3* d_values){
+__global__ void accelcreate(vector3** d_accels, vector3* d_values){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	d_accels[i]=&d_values[i*NUMENTITIES];
 }
@@ -103,6 +109,6 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 
 	if (j == 0){
 		d_hVel[i][k]+=accel_sum[k]*INTERVAL;
-		d_hPos[i][k]+=hVel[i][k]*INTERVAL;
+		d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
 	}
 }
