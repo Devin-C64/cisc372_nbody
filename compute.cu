@@ -83,7 +83,9 @@ void compute(){
 
 __global__ void accelcreate(vector3** d_accels, vector3* d_values){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	d_accels[i]=&d_values[i*NUMENTITIES];
+	if (i < NUMENTITIES){
+		d_accels[i]=&d_values[i*NUMENTITIES];
+	}
 }
 
 
@@ -92,30 +94,34 @@ __global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	int k = threadIdx.z;
-	if (i==j) {
-		FILL_VECTOR(d_accels[i][j],0,0,0);
-	}
-		else{
-			vector3 distance;
-			distance[k]=d_hPos[i][k]-d_hPos[j][k];
-			if (k == 0){
-				double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
-				double magnitude=sqrt(magnitude_sq);
-				double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
-				FILL_VECTOR(d_accels[i][j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
-			}
+	if (i < NUMENTITIES && j < NUMENTITIES){
+		if (i==j) {
+			FILL_VECTOR(d_accels[i][j],0,0,0);
 		}
+			else{
+				vector3 distance;
+				distance[k]=d_hPos[i][k]-d_hPos[j][k];
+				if (k == 0){
+					double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
+					double magnitude=sqrt(magnitude_sq);
+					double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
+					FILL_VECTOR(d_accels[i][j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
+				}
+			}
+	}
 }
 
 __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	int k = threadIdx.z;
-	vector3 accel_sum={0,0,0};
-	accel_sum[k]+=d_accels[i][j][k];
+	if (i < NUMENTITIES && j < NUMENTITIES){
+		vector3 accel_sum={0,0,0};
+		accel_sum[k]+=d_accels[i][j][k];
 
-	if (j == 0){
-		d_hVel[i][k]+=accel_sum[k]*INTERVAL;
-		d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
+		if (j == 0){
+			d_hVel[i][k]+=accel_sum[k]*INTERVAL;
+			d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
+		}
 	}
 }
