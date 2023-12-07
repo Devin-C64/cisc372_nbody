@@ -64,7 +64,8 @@ void compute(){
 	cudaFree(d_hPos);
 	cudaFree(d_hVel);
 	cudaFree(d_mass);
-	free(accels);
+	cudaFree(d_values);
+	cudaFree(d_accels);
 	free(values);
 }
 
