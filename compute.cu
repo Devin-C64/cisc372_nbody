@@ -42,7 +42,7 @@ void compute(){
 	
 	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
 
-	griddimension = (NUMENTITIES / 16) + 1;
+	int griddimension = (NUMENTITIES / 16) + 1;
 	dim3 dimGrid(griddimension, griddimension);
 	dim3 dimBlock(16, 16, 3);
 
