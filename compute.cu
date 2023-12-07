@@ -38,7 +38,7 @@ void compute(){
 	dim3 dimAccelGrid(accelgriddimension, 1);
 	dim3 dimAccelBlock(256, 1);
 	
-	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_values);
+	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
 
 
 	int griddimension;
