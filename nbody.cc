@@ -6,11 +6,12 @@
 #include "config.h"
 #include "planets.h"
 #include "compute.h"
+#include <cuda.h>
 
 // represents the objects in the system.  Global variables
 vector3 *hVel, *d_hVel;
 vector3 *hPos, *d_hPos;
-double *mass;
+double *mass, *d_mass;
 
 //initHostMemory: Create storage for numObjects entities in our system
 //Parameters: numObjects: number of objects to allocate
@@ -27,7 +28,7 @@ void initHostMemory(int numObjects)
 //Parameters: None
 //Returns: None
 //Side Effects: Frees the memory allocated to global variables hVel, hPos, and mass.
-void freeHostMemory()
+void freeMemory()
 {
 	free(hVel);
 	free(hPos);
@@ -111,5 +112,5 @@ int main(int argc, char **argv)
 #endif
 	printf("This took a total time of %f seconds\n",(double)t1/CLOCKS_PER_SEC);
 
-	freeHostMemory();
+	freeMemory();
 }
