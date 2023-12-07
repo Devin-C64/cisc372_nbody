@@ -54,6 +54,7 @@ void compute(){
 	// j = threadindex.y + blockindex.y * blockdim.y
 	// k = threadindex.z
 
+	double* d_mass;
 	cudaMalloc(&d_hPos, sizeof(hPos));
 	cudaMalloc(&d_hVel, sizeof(hVel));
 	cudaMalloc(&d_mass, sizeof(mass));
