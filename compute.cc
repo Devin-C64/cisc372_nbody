@@ -10,15 +10,29 @@
 //Side Effect: Modifies the hPos and hVel arrays with the new positions and accelerations after 1 INTERVAL
 void compute(){
 	//make an acceleration matrix which is NUMENTITIES squared in size;
-	int i,j,k;
 	vector3* values=(vector3*)malloc(sizeof(vector3)*NUMENTITIES*NUMENTITIES);
-	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
-	for (i=0;i<NUMENTITIES;i++)
-		accels[i]=&values[i*NUMENTITIES];
+	cudaMalloc(&d_values, sizeof(values));
+	cudaMemcpy(d_values, values, sizeof(values), cudaMemcpyHostToDevice);
+
+	// vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
+	//for (i=0;i<NUMENTITIES;i++)
+	//	accels[i]=&values[i*NUMENTITIES];
 	
 	vector3** d_accels;
-	cudaMalloc(&d_accels, sizeof(accels));
-	cudaMemcpy(d_accels, accels, sizeof(accels), cudaMemcpyHostToDevice);
+	cudaMalloc(&d_accels, sizeof(vector3*)*NUMENTITIES);
+	// cudaMemcpy(d_accels, accels, sizeof(accels), cudaMemcpyHostToDevice);
+
+	int accelgriddimension;
+	if (NUMENTITIES % 256 != 0){
+		accelgriddimension = (NUMENTITIES / 256) + 1;
+	} else {
+		accelgriddimension = NUMENTITIES / 256;
+	}
+	dim3 dimAccelGrid(accelgriddimension, 1);
+	dim3 dimAccelBlock(256, 1);
+	
+	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_values);
+
 
 	int griddimension;
 	if (NUMENTITIES % 16 != 0){
@@ -52,6 +66,11 @@ void compute(){
 	cudaFree(d_mass);
 	free(accels);
 	free(values);
+}
+
+__global__ void accelcreate(vector3* d_values){
+	int i = threadIdx.x + blockIdx.x * blockDim.x;
+	d_accels[i]=&d_values[i*NUMENTITIES];
 }
 
 __global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
