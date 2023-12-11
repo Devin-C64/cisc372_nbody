@@ -44,8 +44,6 @@ void compute(){
 	dim3 dimAccelGrid(accelgriddimension, 1);
 	dim3 dimAccelBlock(256, 1);
 
-	double *d_mass;
-
 	
 	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
 
