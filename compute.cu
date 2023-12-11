@@ -22,8 +22,13 @@ void compute(){
 	cudaMalloc(&d_values, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	cudaMemcpy(d_values, values, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
 	double *d_mass;
+	vector3 *d_hPos, *d_hVel;
 	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
 	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
+	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
+	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 /*
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
@@ -65,6 +70,8 @@ void compute(){
 	cudaFree(d_values);
 	cudaFree(d_accels);
 	cudaFree(d_mass);
+	cudaFree(d_hPos);
+	cudaFree(d_hVel);
 	free(values);
 }
 

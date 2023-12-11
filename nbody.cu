@@ -9,8 +9,8 @@
 #include <cuda.h>
 
 // represents the objects in the system.  Global variables
-vector3 *hVel, *d_hVel;
-vector3 *hPos, *d_hPos;
+vector3 *hVel;
+vector3 *hPos;
 double *mass;
 
 //initHostMemory: Create storage for numObjects entities in our system
@@ -22,10 +22,6 @@ void initHostMemory(int numObjects)
 	hVel = (vector3 *)malloc(sizeof(vector3) * numObjects);
 	hPos = (vector3 *)malloc(sizeof(vector3) * numObjects);
 	mass = (double *)malloc(sizeof(double) * numObjects);
-	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
-	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
-	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 }
 
 //freeHostMemory: Free storage allocated by a previous call to initHostMemory
@@ -37,8 +33,6 @@ void freeMemory()
 	free(hVel);
 	free(hPos);
 	free(mass);
-	cudaFree(d_hPos);
-	cudaFree(d_hVel);
 }
 
 //planetFill: Fill the first NUMPLANETS+1 entries of the entity arrays with an estimation
