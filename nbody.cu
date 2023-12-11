@@ -5,14 +5,13 @@
 #include "vector.h"
 #include "config.h"
 #include "planets.h"
-#include "compute.h"
+#include <compute.h>
 #include <cuda.h>
 
 // represents the objects in the system.  Global variables
 vector3 *hVel, *d_hVel;
 vector3 *hPos, *d_hPos;
 double *mass;
-double *d_mass;
 
 //initHostMemory: Create storage for numObjects entities in our system
 //Parameters: numObjects: number of objects to allocate
@@ -25,10 +24,8 @@ void initHostMemory(int numObjects)
 	mass = (double *)malloc(sizeof(double) * numObjects);
 	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
 	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
-	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
 	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
 }
 
 //freeHostMemory: Free storage allocated by a previous call to initHostMemory

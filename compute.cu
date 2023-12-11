@@ -2,6 +2,7 @@
 #include <math.h>
 #include "vector.h"
 #include "config.h"
+#include "compute.h"
 #include <cuda.h>
 
 __global__ void accelcreate(vector3** d_accels, vector3* d_values);
@@ -20,6 +21,9 @@ void compute(){
 	vector3* d_values;
 	cudaMalloc(&d_values, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	cudaMemcpy(d_values, values, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
+	double *d_mass;
+	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
+	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 /*
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
@@ -39,6 +43,9 @@ void compute(){
 	}
 	dim3 dimAccelGrid(accelgriddimension, 1);
 	dim3 dimAccelBlock(256, 1);
+
+	double *d_mass;
+
 	
 	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
 
