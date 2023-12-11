@@ -50,14 +50,6 @@ void compute(){
 	// j = threadindex.y + blockindex.y * blockdim.y
 	// k = threadindex.z
 
-	double* d_mass;
-	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
-	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
-	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
-	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
-
 	pairwise<<<dimGrid,dimBlock>>>(d_accels, d_hPos, d_mass);
 
 	sumrows<<<dimGrid,dimBlock>>>(d_accels, d_hVel, d_hPos);
@@ -65,9 +57,6 @@ void compute(){
 	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
 	cudaMemcpy(hPos, d_hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
 
-	cudaFree(d_hPos);
-	cudaFree(d_hVel);
-	cudaFree(d_mass);
 	cudaFree(d_values);
 	cudaFree(d_accels);
 	free(values);
@@ -110,12 +99,10 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	int k = threadIdx.z;
 	if (i < NUMENTITIES && j < NUMENTITIES){
-		if (j == 0){
-			vector3 accel_sum = {0, 0, 0};
+		vector3 accel_sum={0,0,0};
+		accel_sum[k]+=d_accels[i][j][k];
 
-        	for (int jj = 0; jj < NUMENTITIES; ++jj) {
-            	accel_sum[k] += d_accels[i][jj][k];
-        	}
+		if (j == 0){
 			d_hVel[i][k]+=accel_sum[k]*INTERVAL;
 			d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
 		}
