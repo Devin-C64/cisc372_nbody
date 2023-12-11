@@ -39,7 +39,6 @@ void freeMemory()
 	free(mass);
 	cudaFree(d_hPos);
 	cudaFree(d_hVel);
-	cudaFree(d_mass);
 }
 
 //planetFill: Fill the first NUMPLANETS+1 entries of the entity arrays with an estimation
