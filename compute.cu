@@ -9,6 +9,7 @@
 __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass);
 __global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos);
 
+#define BLOCK_SIZE 16
 
 
 //compute: Updates the positions and locations of the objects in the system based on gravity.
@@ -52,7 +53,7 @@ void compute(){
 
 	int griddimension = (NUMENTITIES / 16) + 1;
 	dim3 dimGrid(griddimension, griddimension);
-	dim3 dimBlock(16, 16);
+	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 
 	// i = threadindex.x + blockindex.x * blockdim.x
 	// j = threadindex.y + blockindex.y * blockdim.y
@@ -61,7 +62,7 @@ void compute(){
 	pairwise<<<dimGrid,dimBlock>>>(d_accels, d_hPos, d_mass);
 
 	dim3 dimGrid2(griddimension, 1);
-	dim3 dimBlock2(16,1);
+	dim3 dimBlock2(BLOCK_SIZE,1);
 	sumrows<<<dimGrid2,dimBlock2>>>(d_accels, d_hVel, d_hPos);
 
 	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
@@ -89,8 +90,8 @@ __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 
-	 __shared__ vector3 sharedPos[blockDim.x][blockDim.y];
-    __shared__ double sharedMass[blockDim.y];
+	__shared__ vector3 sharedPos[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ double sharedMass[BLOCK_SIZE];
 
     // Load positions and masses into shared memory
     sharedPos[threadIdx.x][threadIdx.y] = d_hPos[i];
