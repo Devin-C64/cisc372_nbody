@@ -107,7 +107,9 @@ __global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos){
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	int index = i * NUMENTITIES + j;
 	if (i < NUMENTITIES && j < NUMENTITIES){
-		vector3 accel_sum={0,0,0};
+		if (j == 0){
+			vector3 accel_sum={0,0,0};
+		}
 		for (int k=0;k<3;k++)
 				accel_sum[k]+=d_accels[index][k];
 
