@@ -17,27 +17,29 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos);
 //Side Effect: Modifies the hPos and hVel arrays with the new positions and accelerations after 1 INTERVAL
 void compute(){
 	//make an acceleration matrix which is NUMENTITIES squared in size;
+	/*
 	vector3* values=(vector3*)malloc(sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	vector3* d_values;
 	cudaMalloc(&d_values, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	cudaMemcpy(d_values, values, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
-
+	*/
 /*
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
 	for (int i=0;i<NUMENTITIES;i++)
 		accels[i]=&values[i*NUMENTITIES];
 	
 	*/
-	vector3** d_accels;
-	cudaMalloc(&d_accels, sizeof(vector3*)*NUMENTITIES);
+	vector3* d_accels;
+	cudaMalloc(&d_accels, sizeof(vector3)*NUMENTITIES);
 	//cudaMemcpy(d_accels, accels, sizeof(accels), cudaMemcpyHostToDevice);
 
+	/*
 	int accelgriddimension = (NUMENTITIES / 256) + 1;
 	dim3 dimAccelGrid(accelgriddimension, 1);
 	dim3 dimAccelBlock(256, 1);
-
+	*/
 	
-	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
+	// accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
 
 	double *d_mass;
 	vector3 *d_hPos, *d_hVel;
@@ -72,19 +74,21 @@ void compute(){
 }
 
 
-
+/*
 __global__ void accelcreate(vector3** d_accels, vector3* d_values){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	if (i < NUMENTITIES){
 		d_accels[i]=&d_values[i*NUMENTITIES];
 	}
 }
+*/
 
 
 
-__global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
+__global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
+	int index = i * NUMENTITIES + j;
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		if (i==j) {
 			FILL_VECTOR(d_accels[i][j],0,0,0);
@@ -95,18 +99,19 @@ __global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
 				double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
 				double magnitude=sqrt(magnitude_sq);
 				double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
-				FILL_VECTOR(d_accels[i][j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
+				FILL_VECTOR(d_accels[index],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
 			}
 	}
 }
 
-__global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
+__global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
+	int index = i * NUMENTITIES + j;
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		vector3 accel_sum={0,0,0};
 		for (int k=0;k<3;k++)
-				accel_sum[k]+=d_accels[i][j][k];
+				accel_sum[k]+=d_accels[index][k];
 
 		if (j == 0){
 			for (int k=0;k<3;k++){
