@@ -9,7 +9,6 @@
 __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass);
 __global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos);
 
-#define BLOCK_SIZE 16
 
 
 //compute: Updates the positions and locations of the objects in the system based on gravity.
@@ -53,7 +52,7 @@ void compute(){
 
 	int griddimension = (NUMENTITIES / 16) + 1;
 	dim3 dimGrid(griddimension, griddimension);
-	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+	dim3 dimBlock(16, 16);
 
 	// i = threadindex.x + blockindex.x * blockdim.x
 	// j = threadindex.y + blockindex.y * blockdim.y
@@ -62,7 +61,7 @@ void compute(){
 	pairwise<<<dimGrid,dimBlock>>>(d_accels, d_hPos, d_mass);
 
 	dim3 dimGrid2(griddimension, 1);
-	dim3 dimBlock2(BLOCK_SIZE,1);
+	dim3 dimBlock2(16,1);
 	sumrows<<<dimGrid2,dimBlock2>>>(d_accels, d_hVel, d_hPos);
 
 	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
@@ -89,27 +88,18 @@ __global__ void accelcreate(vector3** d_accels, vector3* d_values){
 __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
-
-	__shared__ vector3 sharedPos[BLOCK_SIZE][BLOCK_SIZE];
-    __shared__ double sharedMass[BLOCK_SIZE];
-
-    // Load positions and masses into shared memory
-    sharedPos[threadIdx.x] = d_hPos[i];
-    sharedMass[threadIdx.y] = d_mass[j];
-
-    __syncthreads();
-
+	int index = i * NUMENTITIES + j;
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		if (i==j) {
-			FILL_VECTOR(d_accels[i * NUMENTITIES + j],0,0,0);
+			FILL_VECTOR(d_accels[index],0,0,0);
 		}
 			else{
 				vector3 distance;
-				for (int k=0;k<3;k++) distance[k]=sharedPos[i][k]-sharedPos[j][k];
+				for (int k=0;k<3;k++) distance[k]=d_hPos[i][k]-d_hPos[j][k];
 				double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
 				double magnitude=sqrt(magnitude_sq);
-				double accelmag=-1*GRAV_CONSTANT*sharedMass[j]/magnitude_sq;
-				FILL_VECTOR(d_accels[i * NUMENTITIES + j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
+				double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
+				FILL_VECTOR(d_accels[index],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
 			}
 	}
 }
