@@ -88,18 +88,27 @@ __global__ void accelcreate(vector3** d_accels, vector3* d_values){
 __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
-	int index = i * NUMENTITIES + j;
+
+	 __shared__ vector3 sharedPos[blockDim.x][blockDim.y];
+    __shared__ double sharedMass[blockDim.y];
+
+    // Load positions and masses into shared memory
+    sharedPos[threadIdx.x][threadIdx.y] = d_hPos[i];
+    sharedMass[threadIdx.y] = d_mass[j];
+
+    __syncthreads();
+
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		if (i==j) {
 			FILL_VECTOR(d_accels[index],0,0,0);
 		}
 			else{
 				vector3 distance;
-				for (int k=0;k<3;k++) distance[k]=d_hPos[i][k]-d_hPos[j][k];
+				for (int k=0;k<3;k++) distance[k]=sharedPos[i][k]-sharedPos[j][k];
 				double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
 				double magnitude=sqrt(magnitude_sq);
-				double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
-				FILL_VECTOR(d_accels[index],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
+				double accelmag=-1*GRAV_CONSTANT*sharedMass[j]/magnitude_sq;
+				FILL_VECTOR(d_accels[i * NUMENTITIES + j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
 			}
 	}
 }
