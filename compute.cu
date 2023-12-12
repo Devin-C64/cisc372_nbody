@@ -94,7 +94,7 @@ __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
     __shared__ double sharedMass[BLOCK_SIZE];
 
     // Load positions and masses into shared memory
-    sharedPos[threadIdx.x][threadIdx.y] = d_hPos[i];
+    sharedPos[threadIdx.x] = d_hPos[i];
     sharedMass[threadIdx.y] = d_mass[j];
 
     __syncthreads();
