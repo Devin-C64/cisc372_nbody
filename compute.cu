@@ -49,7 +49,7 @@ void compute(){
 	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 	int griddimension = (NUMENTITIES / 16) + 1;
-	dim3 dimGrid(griddimension, griddimension);
+	dim3 dimGrid(griddimension, griddimension, 1);
 	dim3 dimBlock(16, 16, 3);
 
 	// i = threadindex.x + blockindex.x * blockdim.x
