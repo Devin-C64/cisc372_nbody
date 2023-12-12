@@ -21,14 +21,6 @@ void compute(){
 	vector3* d_values;
 	cudaMalloc(&d_values, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	cudaMemcpy(d_values, values, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
-	double *d_mass;
-	vector3 *d_hPos, *d_hVel;
-	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
-	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
-	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
-	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 /*
 	vector3** accels=(vector3**)malloc(sizeof(vector3*)*NUMENTITIES);
@@ -40,17 +32,21 @@ void compute(){
 	cudaMalloc(&d_accels, sizeof(vector3*)*NUMENTITIES);
 	//cudaMemcpy(d_accels, accels, sizeof(accels), cudaMemcpyHostToDevice);
 
-	int accelgriddimension;
-	if (NUMENTITIES % 256 != 0){
-		accelgriddimension = (NUMENTITIES / 256) + 1;
-	} else {
-		accelgriddimension = NUMENTITIES / 256;
-	}
+	int accelgriddimension = (NUMENTITIES / 256) + 1;
 	dim3 dimAccelGrid(accelgriddimension, 1);
 	dim3 dimAccelBlock(256, 1);
 
 	
 	accelcreate<<<dimAccelGrid,dimAccelBlock>>>(d_accels, d_values);
+
+	double *d_mass;
+	vector3 *d_hPos, *d_hVel;
+	cudaMalloc(&d_mass, sizeof(double) * NUMENTITIES);
+	cudaMemcpy(d_mass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMalloc(&d_hPos, sizeof(vector3) * NUMENTITIES);
+	cudaMalloc(&d_hVel, sizeof(vector3) * NUMENTITIES);
+	cudaMemcpy(d_hPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_hVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
 
 	int griddimension = (NUMENTITIES / 16) + 1;
 	dim3 dimGrid(griddimension, griddimension);
