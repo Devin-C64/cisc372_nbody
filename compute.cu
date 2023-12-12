@@ -5,9 +5,9 @@
 #include "compute.h"
 #include <cuda.h>
 
-__global__ void accelcreate(vector3** d_accels, vector3* d_values);
-__global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass);
-__global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos);
+//__global__ void accelcreate(vector3** d_accels, vector3* d_values);
+__global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass);
+__global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos);
 
 
 
@@ -31,7 +31,7 @@ void compute(){
 	*/
 	vector3* d_accels;
 	cudaMalloc(&d_accels, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
-	cudaMemcpy(d_accels, accels, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_accels, accels, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
 
 	/*
 	int accelgriddimension = (NUMENTITIES / 256) + 1;
