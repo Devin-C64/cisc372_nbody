@@ -30,8 +30,8 @@ void compute(){
 	
 	*/
 	vector3* d_accels;
-	cudaMalloc(&d_accels, sizeof(vector3)*NUMENTITIES);
-	//cudaMemcpy(d_accels, accels, sizeof(accels), cudaMemcpyHostToDevice);
+	cudaMalloc(&d_accels, sizeof(vector3)*NUMENTITIES*NUMENTITIES);
+	cudaMemcpy(d_accels, accels, sizeof(vector3)*NUMENTITIES*NUMENTITIES, cudaMemcpyHostToDevice);
 
 	/*
 	int accelgriddimension = (NUMENTITIES / 256) + 1;
