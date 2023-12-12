@@ -65,12 +65,10 @@ void compute(){
 	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
 	cudaMemcpy(hPos, d_hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
 
-	cudaFree(d_values);
 	cudaFree(d_accels);
 	cudaFree(d_mass);
 	cudaFree(d_hPos);
 	cudaFree(d_hVel);
-	free(values);
 }
 
 
@@ -91,7 +89,7 @@ __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 	int index = i * NUMENTITIES + j;
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		if (i==j) {
-			FILL_VECTOR(d_accels[i][j],0,0,0);
+			FILL_VECTOR(d_accels[index],0,0,0);
 		}
 			else{
 				vector3 distance;
