@@ -101,7 +101,7 @@ __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		if (i==j) {
-			FILL_VECTOR(d_accels[index],0,0,0);
+			FILL_VECTOR(d_accels[i * NUMENTITIES + j],0,0,0);
 		}
 			else{
 				vector3 distance;
