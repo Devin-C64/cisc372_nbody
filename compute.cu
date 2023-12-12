@@ -60,6 +60,8 @@ void compute(){
 
 	pairwise<<<dimGrid,dimBlock>>>(d_accels, d_hPos, d_mass);
 
+	dim3 dimGrid(griddimension, 1);
+	dim3 dimBlock(16,1);
 	sumrows<<<dimGrid,dimBlock>>>(d_accels, d_hVel, d_hPos);
 
 	cudaMemcpy(hVel, d_hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyDeviceToHost);
