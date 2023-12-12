@@ -104,18 +104,16 @@ __global__ void pairwise( vector3* d_accels, vector3* d_hPos, double* d_mass){
 
 __global__ void sumrows(vector3* d_accels, vector3* d_hVel, vector3* d_hPos){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	int j = threadIdx.y + blockIdx.y * blockDim.y;
-	int index = i * NUMENTITIES + j;
-	if (i < NUMENTITIES && j < NUMENTITIES){
+	if (i < NUMENTITIES){
 		vector3 accel_sum={0,0,0};
-		for (int k=0;k<3;k++)
-				accel_sum[k]+=d_accels[index][k];
-
-		if (j == 0){
+		for (int j-0;j<NUMENTITIES;j++){
+			for (int k=0;k<3;k++)
+				accel_sum[k]+=d_accels[i*NUMENTITIES+j][k];
+		}
+		
 			for (int k=0;k<3;k++){
 				d_hVel[i][k]+=accel_sum[k]*INTERVAL;
 				d_hPos[i][k]+=d_hVel[i][k]*INTERVAL;
-			}
 		}
 	}
 }
