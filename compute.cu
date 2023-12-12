@@ -103,7 +103,7 @@ __global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
 __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (i < NUMENTITIES && j < NUMENTITIES){
+	if (i < NUMENTITIES){
 		vector3 accel_sum={0,0,0};
 		for (int j=0;j<NUMENTITIES;j++){
 			for (int k=0;k<3;k++)
