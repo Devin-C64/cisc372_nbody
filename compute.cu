@@ -16,6 +16,7 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos);
 //Returns: None
 //Side Effect: Modifies the hPos and hVel arrays with the new positions and accelerations after 1 INTERVAL
 void compute(){
+	int k;
 	//make an acceleration matrix which is NUMENTITIES squared in size;
 	vector3* values=(vector3*)malloc(sizeof(vector3)*NUMENTITIES*NUMENTITIES);
 	vector3* d_values;
@@ -91,11 +92,11 @@ __global__ void pairwise( vector3** d_accels, vector3* d_hPos, double* d_mass){
 		}
 			else{
 				vector3 distance;
-				for (k=0;k<3;k++) distance[k]=hPos[i][k]-hPos[j][k];
+				for (k=0;k<3;k++) distance[k]=d_hPos[i][k]-d_hPos[j][k];
 				double magnitude_sq=distance[0]*distance[0]+distance[1]*distance[1]+distance[2]*distance[2];
 				double magnitude=sqrt(magnitude_sq);
-				double accelmag=-1*GRAV_CONSTANT*mass[j]/magnitude_sq;
-				FILL_VECTOR(accels[i][j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
+				double accelmag=-1*GRAV_CONSTANT*d_mass[j]/magnitude_sq;
+				FILL_VECTOR(d_accels[i][j],accelmag*distance[0]/magnitude,accelmag*distance[1]/magnitude,accelmag*distance[2]/magnitude);
 			}
 	}
 }
@@ -106,7 +107,7 @@ __global__ void sumrows(vector3** d_accels, vector3* d_hVel, vector3* d_hPos){
 	if (i < NUMENTITIES && j < NUMENTITIES){
 		vector3 accel_sum={0,0,0};
 		for (k=0;k<3;k++)
-				accel_sum[k]+=accels[i][j][k];
+				accel_sum[k]+=d_accels[i][j][k];
 
 		if (j == 0){
 			for (k=0;k<3;k++){
